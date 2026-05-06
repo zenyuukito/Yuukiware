@@ -50,10 +50,16 @@ local PC = Cr("Frame", {Parent = M, BackgroundTransparency = 1, Position = UDim2
 Cr("UIListLayout", {Parent = TC, FillDirection = 0, Padding = UDim.new(0, 5)})
 Cr("UIPadding", {Parent = TC, PaddingLeft = UDim.new(0,5), PaddingRight = UDim.new(0,5), PaddingTop = UDim.new(0,5), PaddingBottom = UDim.new(0,5)})
 
--- 5. Tabs & Loading
-local Tabs, Pg, mi = {"Macro", "FastFlags", "Misc"}, {}, false
+-- 5. Tab Logic & Feature Auto-Loader (UPDATED FOR SUBFOLDERS)
+local Tabs = {
+    {Name = "Macro", Folder = "Macro", File = "SanguineZBoost"}, -- Matches your screenshot
+    {Name = "FastFlags", Folder = "Flags", File = "FastFlags"},
+    {Name = "Misc", Folder = "Misc", File = "Misc"}
+}
+local Pg, mi = {}, false
 
-for i, v in ipairs(Tabs) do
+for i, tab in ipairs(Tabs) do
+    local v = tab.Name
     local B = Cr("TextButton", {Parent = TC, BackgroundColor3 = Color3.fromRGB(20, 20, 20), Size = UDim2.new(1/#Tabs, -5, 1, 0), Text = v:upper(), TextColor3 = (i==1 and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6)), Font = 17, TextSize = 12, LayoutOrder = i})
     Cr("UICorner", {Parent = B, CornerRadius = UDim.new(0, 4)})
     
@@ -61,7 +67,9 @@ for i, v in ipairs(Tabs) do
     Pg[v] = S
     
     task.spawn(function()
-        local s, func = pcall(function() return loadstring(game:HttpGet(Config.RepoBase .. "Features/" .. v .. ".lua"))() end)
+        -- Updated path logic: Features / Subfolder / FileName.lua
+        local Path = Config.RepoBase .. "Features/" .. tab.Folder .. "/" .. tab.File .. ".lua"
+        local s, func = pcall(function() return loadstring(game:HttpGet(Path))() end)
         if s and type(func) == "function" then func(S) end
     end)
 
@@ -70,7 +78,6 @@ for i, v in ipairs(Tabs) do
         for _, b in pairs(TC:GetChildren()) do if b:IsA("TextButton") then TS:Create(b, TweenInfo.new(0.2), {TextColor3 = (b == B and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6))}):Play() end end
     end)
 end
-
 -- 6. Connections
 IC.MouseButton1Click:Connect(function() M.Visible = not M.Visible end)
 Kl.MouseButton1Click:Connect(function() getgenv().YW_Loaded = false SG:Destroy() end)
