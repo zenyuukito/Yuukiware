@@ -1,6 +1,6 @@
 -- YUUKIWARE MAIN LOADER
 local Config = {
-    -- Use the exact 'refs/heads/main' path to ensure GitHub provides the file
+    -- Corrected: Removed the double "Main" and ensured refs/heads is used
     RepoBase = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/",
     IconID = "111918789930704"
 }
