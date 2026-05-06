@@ -1,4 +1,4 @@
--- YUUKIWARE: FINAL ENGINE (UI PRESERVED)
+-- YUUKIWARE
 if getgenv().YW_Loaded then return end
 getgenv().YW_Loaded = true
 
@@ -25,12 +25,12 @@ local US = Cr("UIScale", {Parent = SG})
 local function UpS() US.Scale = math.clamp(C.ViewportSize.X / 1920, 0.75, 1.25) end
 UpS() C:GetPropertyChangedSignal("ViewportSize"):Connect(UpS)
 
--- 3. The Draggable Icon (Your Original UI)
+-- 3. The Draggable Icon
 local IC = Cr("ImageButton", {Parent = SG, BackgroundColor3 = Color3.fromRGB(0,0,0), Position = UDim2.new(0.05, 0, 0.1, 0), Size = UDim2.new(0, 42, 0, 42), ClipsDescendants = true, AutoButtonColor = false})
 Cr("UICorner", {Parent = IC, CornerRadius = UDim.new(0, 12)})
 Cr("ImageLabel", {Parent = IC, BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5,0,0.5,0), Size = UDim2.new(0.85,0,0.85,0), Image = "rbxthumb://type=Asset&id="..Config.IconID.."&w=420&h=420", ScaleType = Enum.ScaleType.Fit})
 
--- 4. Main Menu (Your Original UI)
+-- 4. Main Menu
 local M = Cr("Frame", {Parent = SG, BackgroundColor3 = Color3.fromRGB(10, 10, 10), Position = UDim2.new(0.5, -325, 0.5, -200), Size = UDim2.new(0, 650, 0, 400), Visible = false, ClipsDescendants = true, Active = true})
 Cr("UICorner", {Parent = M, CornerRadius = UDim.new(0, 10)})
 Cr("TextButton", {Parent = M, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Text = "", Modal = true})
@@ -50,11 +50,11 @@ local PC = Cr("Frame", {Parent = M, BackgroundTransparency = 1, Position = UDim2
 Cr("UIListLayout", {Parent = TC, FillDirection = 0, Padding = UDim.new(0, 5)})
 Cr("UIPadding", {Parent = TC, PaddingLeft = UDim.new(0,5), PaddingRight = UDim.new(0,5), PaddingTop = UDim.new(0,5), PaddingBottom = UDim.new(0,5)})
 
--- 5. Tab Logic & Feature Auto-Loader (UPDATED FOR SUBFOLDERS)
+-- 5. Tab Logic & Feature Auto-Loader
 local Tabs = {
-    {Name = "Macro", Folder = "Macro", File = "SanguineZBoost"}, -- Matches your screenshot
-    {Name = "FastFlags", Folder = "Flags", File = "FastFlags"},
-    {Name = "Misc", Folder = "Misc", File = "Misc"}
+    {Name = "Macro", Folder = "Macro", File = "MacroManager"},
+    {Name = "FastFlags", Folder = "Flags", File = "FlagsManager"},
+    {Name = "Misc", Folder = "Misc", File = "MiscManager"}
 }
 local Pg, mi = {}, false
 
