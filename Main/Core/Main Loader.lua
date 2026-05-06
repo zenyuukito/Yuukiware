@@ -53,7 +53,7 @@ for i, v in ipairs(Tabs) do
     
     -- Dynamically loads from the /Features folder based on your Config
     task.spawn(function()
-        local s, func = pcall(function() return loadstring(game:HttpGet(Config.RepoBase .. "Tabs/" .. v .. ".lua"))() end)
+        local s, func = pcall(function() return loadstring(game:HttpGet(Config.RepoBase .. "Modules/" .. v .. ".lua"))() end)
         if s and type(func) == "function" then func(S) end
     end)
 
