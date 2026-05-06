@@ -1,9 +1,10 @@
--- YUUKIWARE MAIN LOADER
+-- YUUKIWARE MAIN LOADER (v1.2 - SYNCED)
 local Config = {
-    -- Corrected: Removed the double "Main" and ensured refs/heads is used
+    -- This URL must match your GitHub structure exactly
     RepoBase = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/",
     IconID = "111918789930704"
 }
+
 local CG, TS, C = game:GetService("CoreGui"), game:GetService("TweenService"), workspace.CurrentCamera
 
 -- 1. Clean Environment
@@ -18,7 +19,7 @@ UpS() C:GetPropertyChangedSignal("ViewportSize"):Connect(UpS)
 
 local function Cr(cl, p) local i = Instance.new(cl) for k, v in pairs(p) do i[k] = v end return i end
 
--- 2. Build the Draggable Icon (Merged Properties)
+-- 2. Build the Draggable Icon
 local IC = Cr("ImageButton", {Parent = SG, BackgroundColor3 = Color3.fromRGB(0,0,0), Position = UDim2.new(0.05, 0, 0.1, 0), Size = UDim2.new(0, 42, 0, 42), ClipsDescendants = true, AutoButtonColor = false})
 Cr("UICorner", {Parent = IC, CornerRadius = UDim.new(0, 12)})
 Cr("ImageLabel", {Parent = IC, BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5,0,0.5,0), Size = UDim2.new(0.85,0,0.85,0), Image = "rbxthumb://type=Asset&id="..Config.IconID.."&w=420&h=420", ScaleType = Enum.ScaleType.Fit})
@@ -50,7 +51,7 @@ for i, v in ipairs(Tabs) do
     local S = Cr("ScrollingFrame", {Parent = PC, Name = v, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = (i==1), ScrollBarThickness = 2, ScrollBarImageColor3 = Color3.new(1, 0.2, 0.2), AutomaticCanvasSize = 2, CanvasSize = UDim2.new(0,0,0,0)})
     Pg[v] = S
     
-    -- Dynamically loads from the /Features folder based on your Config
+    -- Sync with your 'Features' folder name
     task.spawn(function()
         local s, func = pcall(function() return loadstring(game:HttpGet(Config.RepoBase .. "Features/" .. v .. ".lua"))() end)
         if s and type(func) == "function" then func(S) end
@@ -73,15 +74,12 @@ end)
 
 -- 6. Attach Dragging Module
 task.spawn(function() 
-    -- Updated to "Core" because that's where the file is in your screenshot
-    local s, d = pcall(function() 
-        return loadstring(game:HttpGet(Config.RepoBase .. "Core/Dragging.lua"))() 
-    end) 
-    
+    -- Sync with your 'Core' folder name
+    local s, d = pcall(function() return loadstring(game:HttpGet(Config.RepoBase .. "Core/Dragging.lua"))() end) 
     if s and d then 
         d.MakeDraggable(IC)     
         d.MakeDraggable(M, TB)  
     else
-        warn("YuukiWare: Dragging failed. Path tried: " .. Config.RepoBase .. "Core/Dragging.lua")
+        warn("YuukiWare: Dragging failed. Tried: " .. Config.RepoBase .. "Core/Dragging.lua")
     end 
 end)
