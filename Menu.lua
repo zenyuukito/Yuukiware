@@ -9,6 +9,7 @@ if CoreGui:FindFirstChild("YuukiWare") then CoreGui.YuukiWare:Destroy() end
 
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "YuukiWare"
+ScreenGui.IgnoreGuiInset = true
 
 local UIScale = Instance.new("UIScale", ScreenGui)
 local function UpdateScale() UIScale.Scale = math.clamp(Camera.ViewportSize.X / 1920, 0.75, 1.25) end
@@ -26,17 +27,29 @@ local MainIcon = Create("ImageButton", {Parent = ScreenGui, BackgroundColor3 = C
 Instance.new("UICorner", MainIcon).CornerRadius = UDim.new(0, 12)
 Create("ImageLabel", {Parent = MainIcon, BackgroundTransparency = 1, Position = UDim2.new(0.1,0,0.1,0), Size = UDim2.new(0.8,0,0.8,0), Image = ICON_ASSET})
 
--- Main Frame (Clean & Large)
-local MainMenu = Create("Frame", {Parent = ScreenGui, BackgroundColor3 = Color3.fromRGB(10, 10, 10), Position = UDim2.new(0.5, -325, 0.5, -200), Size = UDim2.new(0, 650, 0, 400), Visible = false, ClipsDescendants = true, BorderSizePixel = 0})
+-- Main Frame
+local MainMenu = Create("Frame", {
+    Parent = ScreenGui, 
+    BackgroundColor3 = Color3.fromRGB(10, 10, 10), 
+    Position = UDim2.new(0.5, -325, 0.5, -200), 
+    Size = UDim2.new(0, 650, 0, 400), 
+    Visible = false, 
+    ClipsDescendants = true, 
+    BorderSizePixel = 0,
+    Active = true -- Prevents clicking through the menu
+})
 Instance.new("UICorner", MainMenu).CornerRadius = UDim.new(0, 10)
+
+-- Camera Lock Fix (Invisible button to capture focus)
+Create("TextButton", {Parent = MainMenu, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Text = "", Modal = true})
 
 local TopBar = Create("Frame", {Parent = MainMenu, BackgroundColor3 = Color3.fromRGB(15, 15, 15), Size = UDim2.new(1, 0, 0, 42)})
 Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
 
 -- Text Effect
-local txt = {Parent = TopBar, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(0, 300, 1, 0), Text = "YUUKIWARE", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 19, Font = Enum.Font.Michroma, TextXAlignment = "Left"}
-Create("TextLabel", txt).TextTransparency = 0.6
-Create("TextLabel", txt).ZIndex = 2
+local txtProps = {Parent = TopBar, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(0, 300, 1, 0), Text = "YUUKIWARE", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 19, Font = Enum.Font.Michroma, TextXAlignment = "Left"}
+Create("TextLabel", txtProps).TextTransparency = 0.6
+Create("TextLabel", txtProps).ZIndex = 2
 
 -- Functional Buttons
 local MinBtn = Create("TextButton", {Parent = TopBar, BackgroundTransparency = 1, Position = UDim2.new(1, -80, 0, 0), Size = UDim2.new(0, 35, 1, 0), Text = "-", TextColor3 = Color3.new(1,1,1), TextSize = 20, Font = "GothamMedium"})
