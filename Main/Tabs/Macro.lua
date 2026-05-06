@@ -1,28 +1,18 @@
 return function(Page)
-    -- 1. Setup Variables & Local Player
     local lp = game.Players.LocalPlayer
-    local UIS = game:GetService("UserInputService")
-    
-    -- Base URLs for your Functions (using your provided links)
     local FuncURL = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/main/Main/Functions/"
     
-    -- 2. Load the Modular "Brains"
-    -- We use pcall to ensure the menu doesn't crash if GitHub is down
-    local success, ToggleMod = pcall(function() return loadstring(game:HttpGet(FuncURL .. "Toggle.lua"))() end)
-    local _, KeybindMod = pcall(function() return loadstring(game:HttpGet(FuncURL .. "Keybind.lua"))() end)
-    local _, MobileMod = pcall(function() return loadstring(game:HttpGet(FuncURL .. "Draggablebtn.lua"))() end)
+    -- Load Modules
+    local ToggleMod = loadstring(game:HttpGet(FuncURL .. "Toggle.lua"))()
+    local KeybindMod = loadstring(game:HttpGet(FuncURL .. "Keybind.lua"))()
+    local MobileMod = loadstring(game:HttpGet(FuncURL .. "Draggablebtn.lua"))()
 
-    if not success then warn("YuukiWare: Failed to load Toggle Module") return end
-
-    ---------------------------------------------------------
-    -- FEATURE 1: FREEZE CHARACTER
-    ---------------------------------------------------------
     local IsEnabled = false
     local IsFrozen = false
-    local MobileBtn = nil
+    local FloatingBtn = nil
 
-    -- The actual logic function
-    local function runFreeze()
+    -- The Logic Function
+    local function runAction()
         if not IsEnabled then return end
         local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
         if root then
@@ -31,36 +21,39 @@ return function(Page)
         end
     end
 
-    -- Create the UI Row using your Toggle.lua
-    -- This assumes ToggleMod:Create(Parent, Text, Callback)
-    local Row = ToggleMod:Create(Page, "Freeze Character", function(state)
+    -- 1. Create the Row with the new name
+    local Row = ToggleMod:Create(Page, "Long range sanguine", function(state)
         IsEnabled = state
-        -- Force unfreeze if the toggle is turned off
-        if not state and IsFrozen then
+        if not state and IsFrozen then 
             local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
             if root then root.Anchored = false end
-            IsFrozen = false
+            IsFrozen = false 
         end
     end)
 
-    -- Attach Keybind (assuming KeybindMod:Add(Row, Default, Callback))
-    if KeybindMod then
-        KeybindMod:Add(Row, Enum.KeyCode.Q, function()
-            runFreeze()
-        end)
-    end
+    -- 2. Add Mobile Floating Button Toggle (Next to the Toggle)
+    local MobIcon = Instance.new("TextButton", Row)
+    MobIcon.Size = UDim2.new(0, 50, 0, 22)
+    MobIcon.Position = UDim2.new(1, -165, 0.5, -11) -- Placed left of Keybind
+    MobIcon.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    MobIcon.Text = "MOBILE"
+    MobIcon.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+    MobIcon.Font = 17
+    MobIcon.TextSize = 10
+    Instance.new("UICorner", MobIcon).CornerRadius = UDim.new(0, 4)
 
-    -- Attach Mobile Button (assuming MobileMod:Add(Row, Callback))
-    if MobileMod then
-        local MobToggle = Instance.new("TextButton") -- Placeholder for your Mob Toggle UI
-        -- This logic allows users to spawn a floating button for the macro
-        MobToggle.MouseButton1Click:Connect(function()
-            if MobileBtn then
-                MobileBtn:Destroy()
-                MobileBtn = nil
-            else
-                MobileBtn = MobileMod:Create("Freeze", runFreeze)
-            end
-        end)
-    end
+    MobIcon.MouseButton1Click:Connect(function()
+        if FloatingBtn then
+            FloatingBtn:Destroy()
+            FloatingBtn = nil
+            MobIcon.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+        else
+            -- Spawns the draggable button using your Draggablebtn.lua
+            FloatingBtn = MobileMod:Create("Sanguine", runAction)
+            MobIcon.TextColor3 = Color3.fromRGB(130, 0, 0) -- Turn crimson when active
+        end
+    end)
+
+    -- 3. Add Keybind (Next to the Toggle)
+    KeybindMod:Add(Row, Enum.KeyCode.Q, runAction)
 end
