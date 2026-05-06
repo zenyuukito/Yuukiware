@@ -2,24 +2,58 @@ local Toggle = {}
 
 function Toggle:Create(Page, Text, Callback)
     local function Cr(cl, p) local i = Instance.new(cl) for k, v in pairs(p) do i[k] = v end return i end
+    local TS = game:GetService("TweenService")
     
-    -- Create the Row
-    local Row = Cr("Frame", {Parent = Page, Size = UDim2.new(1, 0, 0, 32), BackgroundTransparency = 1})
+    -- The Row Container
+    local Row = Cr("Frame", {Parent = Page, Size = UDim2.new(1, 0, 0, 36), BackgroundTransparency = 1})
     
-    -- The Checkbox UI
-    local Box = Cr("TextButton", {Parent = Row, Size = UDim2.new(0, 20, 0, 20), Position = UDim2.new(0, 5, 0, 6), BackgroundColor3 = Color3.fromRGB(25, 25, 25), Text = ""})
-    local Check = Cr("Frame", {Parent = Box, Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(0.5, -6, 0.5, -6), BackgroundColor3 = Color3.fromRGB(255, 50, 50), Visible = false})
-    Cr("UICorner", {Parent = Box, CornerRadius = UDim.new(0, 4)})
-    Cr("TextLabel", {Parent = Row, Position = UDim2.new(0, 35, 0, 0), Size = UDim2.new(0, 150, 1, 0), Text = Text:upper(), TextColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, TextXAlignment = 0, Font = 17, TextSize = 13})
+    -- The Label (Left Side)
+    local Lbl = Cr("TextLabel", {
+        Parent = Row, 
+        Position = UDim2.new(0, 10, 0, 0), 
+        Size = UDim2.new(0.5, 0, 1, 0), 
+        Text = Text:upper(), 
+        TextColor3 = Color3.new(1, 1, 1), 
+        BackgroundTransparency = 1, 
+        TextXAlignment = 0, 
+        Font = 17, 
+        TextSize = 13
+    })
 
+    -- The Toggle Background (Right Side)
+    local Switch = Cr("TextButton", {
+        Parent = Row, 
+        Position = UDim2.new(1, -45, 0.5, -9), 
+        Size = UDim2.new(0, 35, 0, 18), 
+        BackgroundColor3 = Color3.fromRGB(30, 30, 30), 
+        Text = ""
+    })
+    Cr("UICorner", {Parent = Switch, CornerRadius = UDim.new(1, 0)})
+
+    -- The Sliding Knob
+    local Knob = Cr("Frame", {
+        Parent = Switch, 
+        Position = UDim2.new(0, 2, 0.5, -7), 
+        Size = UDim2.new(0, 14, 0, 14), 
+        BackgroundColor3 = Color3.new(0.6, 0.6, 0.6)
+    })
+    Cr("UICorner", {Parent = Knob, CornerRadius = UDim.new(1, 0)})
+
+    -- Dark Crimson Theme
+    local Crimson = Color3.fromRGB(130, 0, 0)
     local Enabled = false
-    Box.MouseButton1Click:Connect(function()
+
+    Switch.MouseButton1Click:Connect(function()
         Enabled = not Enabled
-        Check.Visible = Enabled
+        TS:Create(Knob, TweenInfo.new(0.2), {
+            Position = Enabled and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7),
+            BackgroundColor3 = Enabled and Color3.new(1, 1, 1) or Color3.new(0.6, 0.6, 0.6)
+        }):Play()
+        TS:Create(Switch, TweenInfo.new(0.2), {BackgroundColor3 = Enabled and Crimson or Color3.fromRGB(30, 30, 30)}):Play()
         Callback(Enabled)
     end)
 
-    return Row -- This allows Keybinds to attach to this specific row!
+    return Row -- Return the row so we can attach Keybinds/Mobile buttons to it
 end
 
-return Toggle -- CRITICAL: This is what sends the "Create" function back to Macro.lua
+return Toggle
