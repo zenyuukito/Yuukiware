@@ -6,7 +6,7 @@ return function(Page)
 	-- Load dependencies directly from your GitHub repo
 	local BaseURL = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/main/Main/Functions/"
 	local KeybindSystem = loadstring(game:HttpGet(BaseURL .. "Keybind.lua"))()
-	local MobileUI = loadstring(game:HttpGet(BaseURL .. "Draggablebtn.lua"))()
+	local MobileUI = loadstring(game:HttpGet(https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Functions/Draggablebtn.lua))()
 
 	local function Cr(cl, p) local i = Instance.new(cl) for k, v in pairs(p) do i[k] = v end return i end
 
