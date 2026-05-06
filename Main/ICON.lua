@@ -1,7 +1,7 @@
 local CoreGui = game:GetService("CoreGui")
 
 local DECAL_ID = "111918789930704" 
-local DRAG_URL = "https://https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Functions/Dragging.lua"
+local DRAG_URL = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Functions/Dragging.lua"
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "YuukiWare"
