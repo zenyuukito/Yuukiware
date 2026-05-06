@@ -1,75 +1,70 @@
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
-local Camera = workspace.CurrentCamera
+local CG, TS, C = game:GetService("CoreGui"), game:GetService("TweenService"), workspace.CurrentCamera
+local D_URL, ICON = "https://raw.githubusercontent.com/zenyuukito/Dragging-logic/10f5932f5aa0f0106075a80cbf5704b40e7507ad/Dragging.lua", "rbxthumb://type=Asset&id=111918789930704&w=420&h=420"
+if CG:FindFirstChild("YuukiWare") then CG.YuukiWare:Destroy() end
+local SG = Instance.new("ScreenGui", CG) SG.Name, SG.IgnoreGuiInset = "YuukiWare", true
+local US = Instance.new("UIScale", SG)
+local function UpS() US.Scale = math.clamp(C.ViewportSize.X / 1920, 0.75, 1.25) end
+UpS() C:GetPropertyChangedSignal("ViewportSize"):Connect(UpS)
+local function Cr(cl, p) local i = Instance.new(cl) for k, v in pairs(p) do i[k] = v end return i end
 
-local DRAG_URL = "https://raw.githubusercontent.com/zenyuukito/Dragging-logic/10f5932f5aa0f0106075a80cbf5704b40e7507ad/Dragging.lua"
-local ICON_ASSET = "rbxthumb://type=Asset&id=111918789930704&w=420&h=420"
+local IC = Cr("ImageButton", {Parent = SG, BackgroundColor3 = Color3.new(0,0,0), Position = UDim2.new(0.05, 0, 0.1, 0), Size = UDim2.new(0, 50, 0, 50)})
+Cr("UICorner", {Parent = IC, CornerRadius = UDim.new(0, 12)})
+Cr("ImageLabel", {Parent = IC, BackgroundTransparency = 1, Position = UDim2.new(0.1,0,0.1,0), Size = UDim2.new(0.8,0,0.8,0), Image = ICON})
 
-if CoreGui:FindFirstChild("YuukiWare") then CoreGui.YuukiWare:Destroy() end
+local M = Cr("Frame", {Parent = SG, BackgroundColor3 = Color3.fromRGB(10, 10, 10), Position = UDim2.new(0.5, -325, 0.5, -200), Size = UDim2.new(0, 650, 0, 400), Visible = false, ClipsDescendants = true, Active = true})
+Cr("UICorner", {Parent = M, CornerRadius = UDim.new(0, 10)})
+Cr("TextButton", {Parent = M, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Text = "", Modal = true})
 
-local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "YuukiWare"
-ScreenGui.IgnoreGuiInset = true
+local TB = Cr("Frame", {Parent = M, BackgroundColor3 = Color3.fromRGB(15, 15, 15), Size = UDim2.new(1, 0, 0, 42)})
+Cr("UICorner", {Parent = TB, CornerRadius = UDim.new(0, 10)})
+local TX = {Parent = TB, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(0, 300, 1, 0), Text = "YUUKIWARE", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 19, Font = 19, TextXAlignment = 0}
+Cr("TextLabel", TX).TextTransparency = 0.6
+Cr("TextLabel", TX).ZIndex = 2
 
-local UIScale = Instance.new("UIScale", ScreenGui)
-local function UpdateScale() UIScale.Scale = math.clamp(Camera.ViewportSize.X / 1920, 0.75, 1.25) end
-UpdateScale()
-Camera:GetPropertyChangedSignal("ViewportSize"):Connect(UpdateScale)
+local Mn, Kl = Cr("TextButton", {Parent = TB, BackgroundTransparency = 1, Position = UDim2.new(1, -80, 0, 0), Size = UDim2.new(0, 35, 1, 0), Text = "-", TextColor3 = Color3.new(1,1,1), TextSize = 20, Font = 17}), Cr("TextButton", {Parent = TB, BackgroundTransparency = 1, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.new(0, 35, 1, 0), Text = "x", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 20, Font = 17})
 
-local function Create(class, props)
-    local inst = Instance.new(class)
-    for i, v in pairs(props) do inst[i] = v end
-    return inst
+local TC = Cr("Frame", {Parent = M, BackgroundColor3 = Color3.fromRGB(12, 12, 12), Position = UDim2.new(0, 0, 0, 42), Size = UDim2.new(1, 0, 0, 35)})
+local PC = Cr("Frame", {Parent = M, BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 85), Size = UDim2.new(1, -20, 1, -95)})
+local L = Instance.new("UIListLayout", TC) L.FillDirection, L.Padding = 0, UDim.new(0, 5)
+local Pad = Instance.new("UIPadding", TC) Pad.PaddingLeft, Pad.PaddingRight, Pad.PaddingTop, Pad.PaddingBottom = UDim.new(0,5), UDim.new(0,5), UDim.new(0,5), UDim.new(0,5)
+
+local Tabs, Pg, mi = {"Macro", "FastFlags", "Misc"}, {}, false
+for i, v in ipairs(Tabs) do
+    local B = Cr("TextButton", {Parent = TC, BackgroundColor3 = Color3.fromRGB(20, 20, 20), Size = UDim2.new(1/#Tabs, -5, 1, 0), Text = v:upper(), TextColor3 = (i==1 and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6)), Font = 17, TextSize = 12, LayoutOrder = i})
+    Cr("UICorner", {Parent = B, CornerRadius = UDim.new(0, 4)})
+    local S = Cr("ScrollingFrame", {Parent = PC, Name = v, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = (i==1), ScrollBarThickness = 2, ScrollBarImageColor3 = Color3.new(1, 0.2, 0.2), AutomaticCanvasSize = 2, CanvasSize = UDim2.new(0,0,0,0)})
+    Pg[v] = S
+    B.MouseButton1Click:Connect(function()
+        for n, p in pairs(Pg) do p.Visible = (n == v) end
+        for _, b in pairs(TC:GetChildren()) do if b:IsA("TextButton") then TS:Create(b, TweenInfo.new(0.2), {TextColor3 = (b == B and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6))}):Play() end end
+    end)
 end
 
--- Toggle Icon
-local MainIcon = Create("ImageButton", {Parent = ScreenGui, BackgroundColor3 = Color3.new(0,0,0), Position = UDim2.new(0.05, 0, 0.1, 0), Size = UDim2.new(0, 50, 0, 50)})
-Instance.new("UICorner", MainIcon).CornerRadius = UDim.new(0, 12)
-Create("ImageLabel", {Parent = MainIcon, BackgroundTransparency = 1, Position = UDim2.new(0.1,0,0.1,0), Size = UDim2.new(0.8,0,0.8,0), Image = ICON_ASSET})
+IC.MouseButton1Click:Connect(function() M.Visible = not M.Visible end)
+Kl.MouseButton1Click:Connect(function() SG:Destroy() end)
+Mn.MouseButton1Click:Connect(function() mi = not mi TS:Create(M, TweenInfo.new(0.3), {Size = mi and UDim2.new(0, 650, 0, 42) or UDim2.new(0, 650, 0, 400)}):Play() Mn.Text = mi and "+" or "-" end)
+task.spawn(function() local _, d = pcall(function() return loadstring(game:HttpGet(D_URL))() end) if d then local f = (type(d) == "table" and d.MakeDraggable or d) f(IC) f(M, TB) end end)
+local TC = Create("Frame", {Parent = MainMenu, Name = "Tabs", BackgroundColor3 = Color3.fromRGB(12, 12, 12), Position = UDim2.new(0, 0, 0, 42), Size = UDim2.new(1, 0, 0, 35), BorderSizePixel = 0})
+local PC = Create("Frame", {Parent = MainMenu, Name = "Pages", BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 85), Size = UDim2.new(1, -20, 1, -95)})
+local L = Instance.new("UIListLayout", TC)
+L.FillDirection, L.SortOrder, L.Padding = 0, 0, UDim.new(0, 5)
+local P = Instance.new("UIPadding", TC)
+P.PaddingLeft, P.PaddingRight, P.PaddingTop, P.PaddingBottom = UDim.new(0, 5), UDim.new(0, 5), UDim.new(0, 5), UDim.new(0, 5)
 
--- Main Frame
-local MainMenu = Create("Frame", {
-    Parent = ScreenGui, 
-    BackgroundColor3 = Color3.fromRGB(10, 10, 10), 
-    Position = UDim2.new(0.5, -325, 0.5, -200), 
-    Size = UDim2.new(0, 650, 0, 400), 
-    Visible = false, 
-    ClipsDescendants = true, 
-    BorderSizePixel = 0,
-    Active = true -- Prevents clicking through the menu
-})
-Instance.new("UICorner", MainMenu).CornerRadius = UDim.new(0, 10)
+local T = {"Macro", "FastFlags", "Misc"}
+local Pg = {}
 
--- Camera Lock Fix (Invisible button to capture focus)
-Create("TextButton", {Parent = MainMenu, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Text = "", Modal = true})
-
-local TopBar = Create("Frame", {Parent = MainMenu, BackgroundColor3 = Color3.fromRGB(15, 15, 15), Size = UDim2.new(1, 0, 0, 42)})
-Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
-
--- Text Effect
-local txtProps = {Parent = TopBar, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(0, 300, 1, 0), Text = "YUUKIWARE", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 19, Font = Enum.Font.Michroma, TextXAlignment = "Left"}
-Create("TextLabel", txtProps).TextTransparency = 0.6
-Create("TextLabel", txtProps).ZIndex = 2
-
--- Functional Buttons
-local MinBtn = Create("TextButton", {Parent = TopBar, BackgroundTransparency = 1, Position = UDim2.new(1, -80, 0, 0), Size = UDim2.new(0, 35, 1, 0), Text = "-", TextColor3 = Color3.new(1,1,1), TextSize = 20, Font = "GothamMedium"})
-local KillBtn = Create("TextButton", {Parent = TopBar, BackgroundTransparency = 1, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.new(0, 35, 1, 0), Text = "x", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 20, Font = "GothamMedium"})
-
--- Logic
-local min = false
-MainIcon.MouseButton1Click:Connect(function() MainMenu.Visible = not MainMenu.Visible end)
-KillBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-MinBtn.MouseButton1Click:Connect(function()
-    min = not min
-    TweenService:Create(MainMenu, TweenInfo.new(0.3), {Size = min and UDim2.new(0, 650, 0, 42) or UDim2.new(0, 650, 0, 400)}):Play()
-    MinBtn.Text = min and "+" or "-"
-end)
-
--- Dragging
-task.spawn(function()
-    local _, Drag = pcall(function() return loadstring(game:HttpGet(DRAG_URL))() end)
-    if Drag then 
-        local d = (type(Drag) == "table" and Drag.MakeDraggable or Drag)
-        d(MainIcon) d(MainMenu, TopBar) 
-    end
-end)
+for i, v in ipairs(T) do
+    local B = Create("TextButton", {Parent = TC, Name = v.."B", BackgroundColor3 = Color3.fromRGB(20, 20, 20), Size = UDim2.new(1/#T, -5, 1, 0), Text = v:upper(), TextColor3 = (i==1 and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6)), Font = 17, TextSize = 12, LayoutOrder = i})
+    Instance.new("UICorner", B).CornerRadius = UDim.new(0, 4)
+    local S = Create("ScrollingFrame", {Parent = PC, Name = v.."P", Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = (i==1), ScrollBarThickness = 2, ScrollBarImageColor3 = Color3.new(1, 0.2, 0.2), AutomaticCanvasSize = 2, CanvasSize = UDim2.new(0,0,0,0), BorderSizePixel = 0})
+    Pg[v] = S
+    B.MouseButton1Click:Connect(function()
+        for n, p in pairs(Pg) do p.Visible = (n == v) end
+        for _, b in pairs(TC:GetChildren()) do
+            if b:IsA("TextButton") then
+                TweenService:Create(b, TweenInfo.new(0.2), {TextColor3 = (b == B and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6))}):Play()
+            end
+        end
+    end)
+end
