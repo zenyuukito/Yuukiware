@@ -1,7 +1,7 @@
 -- YUUKIWARE MAIN LOADER
 local Config = {
     -- Change these if you rename your repo or folders
-    RepoBase = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/main/Main/",
+    RepoBase = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/main/",
     IconID = "111918789930704"
 }
 
