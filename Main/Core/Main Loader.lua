@@ -74,9 +74,12 @@ end)
 
 -- 6. Attach Dragging Module
 task.spawn(function() 
-    local s, d = pcall(function() return loadstring(game:HttpGet(Config.RepoBase .. "Core/Dragging.lua"))() end)
+    -- Make sure this says "Core" to match your folder!
+    local s, d = pcall(function() return loadstring(game:HttpGet(Config.RepoBase .. "Core/Dragging.lua"))() end) 
     if s and d then 
-        d.MakeDraggable(IC)     -- Icon is draggable anywhere
-        d.MakeDraggable(M, TB)  -- Menu is dragged via the TopBar (TB)
+        d.MakeDraggable(IC)     
+        d.MakeDraggable(M, TB)  
+    else
+        warn("Dragging logic failed to load. Check path: " .. Config.RepoBase .. "Core/Dragging.lua")
     end 
 end)
