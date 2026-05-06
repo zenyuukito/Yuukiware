@@ -1,5 +1,5 @@
 local CG, TS, C = game:GetService("CoreGui"), game:GetService("TweenService"), workspace.CurrentCamera
-local D_URL, ICON = "https://raw.githubusercontent.com/zenyuukito/Dragging-logic/10f5932f5aa0f0106075a80cbf5704b40e7507ad/Dragging.lua", "rbxthumb://type=Asset&id=111918789930704&w=420&h=420"
+local D_URL, ICON = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Functions/Dragging.lua", "rbxthumb://type=Asset&id=111918789930704&w=420&h=420"
 if CG:FindFirstChild("YuukiWare") then CG.YuukiWare:Destroy() end
 local SG = Instance.new("ScreenGui", CG) SG.Name, SG.IgnoreGuiInset = "YuukiWare", true
 local US = Instance.new("UIScale", SG)
