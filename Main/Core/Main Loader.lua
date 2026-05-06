@@ -1,10 +1,9 @@
 -- YUUKIWARE MAIN LOADER
 local Config = {
-    -- Change these if you rename your repo or folders
-    RepoBase = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/main/Main/",
+    -- Use the exact 'refs/heads/main' path to ensure GitHub provides the file
+    RepoBase = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/",
     IconID = "111918789930704"
 }
-
 local CG, TS, C = game:GetService("CoreGui"), game:GetService("TweenService"), workspace.CurrentCamera
 
 -- 1. Clean Environment
