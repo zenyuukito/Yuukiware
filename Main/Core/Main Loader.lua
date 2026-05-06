@@ -73,12 +73,15 @@ end)
 
 -- 6. Attach Dragging Module
 task.spawn(function() 
-    -- Make sure this says "Core" to match your folder!
-    local s, d = pcall(function() return loadstring(game:HttpGet(Config.RepoBase .. "Core/Dragging.lua"))() end) 
+    -- Points to the Functions folder where Dragging.lua actually lives
+    local s, d = pcall(function() 
+        return loadstring(game:HttpGet(Config.RepoBase .. "Functions/Dragging.lua"))() 
+    end) 
+    
     if s and d then 
         d.MakeDraggable(IC)     
         d.MakeDraggable(M, TB)  
     else
-        warn("Dragging logic failed to load. Check path: " .. Config.RepoBase .. "Core/Dragging.lua")
+        warn("YuukiWare: Dragging failed. Path tried: " .. Config.RepoBase .. "Functions/Dragging.lua")
     end 
 end)
