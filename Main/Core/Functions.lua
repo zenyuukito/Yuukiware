@@ -233,6 +233,105 @@ end
 Core.Toggle = Toggle
 
 -- ===============================
+-- 5. DRAGGABLE BUTTON (Mobile/PC)
+-- ===============================
+local Draggable = {}
+
+function Draggable:CreateButton(ButtonText, OnClick, parent)
+    parent = parent or game:GetService("CoreGui")
+    local UIS = Globals.UIS
+    
+    local btn = Instance.new("ImageButton")
+    btn.Name = "YuukiFloatingBtn"
+    btn.Parent = parent
+    btn.Size = UDim2.new(0, 50, 0, 50)
+    btn.Position = UDim2.new(0.8, 0, 0.7, 0)  -- default bottom right
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    btn.Image = ""
+    btn.AutoButtonColor = false
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = btn
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(150, 0, 0)
+    stroke.Thickness = 1.5
+    stroke.Parent = btn
+    
+    local label = Instance.new("TextLabel")
+    label.Parent = btn
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = ButtonText or "!"
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextSize = 20
+    label.Font = Enum.Font.GothamBold
+    
+    -- Drag logic (click + drag, not hold)
+    local dragging = false
+    local dragStartPos, dragStartMousePos
+    
+    local function updatePosition(input)
+        local delta = input.Position - dragStartMousePos
+        local newPos = UDim2.new(
+            dragStartPos.X.Scale, dragStartPos.X.Offset + delta.X,
+            dragStartPos.Y.Scale, dragStartPos.Y.Offset + delta.Y
+        )
+        btn.Position = newPos
+    end
+    
+    local function onInputBegan(input, gameProcessed)
+        if gameProcessed then return end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStartPos = btn.Position
+            dragStartMousePos = input.Position
+            -- Prevent click from firing if we drag
+            local conn
+            conn = UIS.InputChanged:Connect(function(ic)
+                if ic.UserInputType == input.UserInputType and dragging then
+                    updatePosition(ic)
+                end
+            end)
+            local releaseConn
+            releaseConn = UIS.InputEnded:Connect(function(ie)
+                if ie.UserInputType == input.UserInputType then
+                    dragging = false
+                    conn:Disconnect()
+                    releaseConn:Disconnect()
+                end
+            end)
+        end
+    end
+    
+    local function onClick(input)
+        if not dragging then
+            pcall(OnClick)
+        end
+        dragging = false -- reset flag
+    end
+    
+    UIS.InputBegan:Connect(onInputBegan)
+    btn.InputEnded:Connect(onClick) -- works for both mouse and touch
+    
+    -- Also support mouse button click without drag
+    btn.MouseButton1Click:Connect(function()
+        if not dragging then pcall(OnClick) end
+        dragging = false
+    end)
+    btn.TouchTap:Connect(function()
+        if not dragging then pcall(OnClick) end
+        dragging = false
+    end)
+    
+    -- Return the button so it can be destroyed later
+    return btn
+end
+
+Core.Draggable = Draggable
+
+-- ===============================
 -- RETURN EVERYTHING
 -- ===============================
 return Core
