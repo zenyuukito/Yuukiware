@@ -12,6 +12,10 @@ if CG:FindFirstChild("YuukiWare") then CG.YuukiWare:Destroy() end
 
 local function Cr(cl, p) local i = Instance.new(cl) for k, v in pairs(p) do i[k] = v end return i end
 
+-- Cleanup system
+local Cleanup = {}
+local function AddCleanup(conn) table.insert(Cleanup, conn) end
+
 -- 1. Version Fetching
 local Ver = "v1.0"
 task.spawn(function()
@@ -23,7 +27,8 @@ end)
 local SG = Cr("ScreenGui", {Parent = CG, Name = "YuukiWare", IgnoreGuiInset = true})
 local US = Cr("UIScale", {Parent = SG})
 local function UpS() US.Scale = math.clamp(C.ViewportSize.X / 1920, 0.75, 1.25) end
-UpS() C:GetPropertyChangedSignal("ViewportSize"):Connect(UpS)
+UpS()
+AddCleanup(C:GetPropertyChangedSignal("ViewportSize"):Connect(UpS))
 
 -- 3. The Draggable Icon
 local IC = Cr("ImageButton", {Parent = SG, BackgroundColor3 = Color3.fromRGB(0,0,0), Position = UDim2.new(0.05, 0, 0.1, 0), Size = UDim2.new(0, 42, 0, 42), ClipsDescendants = true, AutoButtonColor = false})
@@ -39,7 +44,7 @@ local TB = Cr("Frame", {Parent = M, BackgroundColor3 = Color3.fromRGB(15, 15, 15
 Cr("UICorner", {Parent = TB, CornerRadius = UDim.new(0, 10)})
 local Title = Cr("TextLabel", {Parent = TB, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(0, 300, 1, 0), Text = "YUUKIWARE", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 19, Font = 19, TextXAlignment = 0, TextTransparency = 0.6, ZIndex = 2})
 
--- Update title with version once loaded
+-- Update title with version once loaded (guarded loop)
 task.spawn(function()
     while SG and SG.Parent do
         task.wait(1)
@@ -55,7 +60,7 @@ local PC = Cr("Frame", {Parent = M, BackgroundTransparency = 1, Position = UDim2
 Cr("UIListLayout", {Parent = TC, FillDirection = 0, Padding = UDim.new(0, 5)})
 Cr("UIPadding", {Parent = TC, PaddingLeft = UDim.new(0,5), PaddingRight = UDim.new(0,5), PaddingTop = UDim.new(0,5), PaddingBottom = UDim.new(0,5)})
 
--- 5. Tab Logic & Feature Auto-Loader
+-- 5. Tab Logic & Feature Auto-Loader (with console error logging)
 local Tabs = {
     {Name = "Macro", Folder = "Macro", File = "MacroManager"},
     {Name = "FastFlags", Folder = "Flags", File = "FlagsManager"},
@@ -72,10 +77,21 @@ for i, tab in ipairs(Tabs) do
     Pg[v] = S
     
     task.spawn(function()
-        -- Updated path logic: Features / Subfolder / FileName.lua
         local Path = Config.RepoBase .. "Features/" .. tab.Folder .. "/" .. tab.File .. ".lua"
-        local s, func = pcall(function() return loadstring(game:HttpGet(Path))() end)
-        if s and type(func) == "function" then func(S) end
+        local httpOk, code = pcall(function() return game:HttpGet(Path) end)
+        if not httpOk then
+            warn("[Yuukiware] HTTP error loading " .. tab.Name .. ": " .. tostring(code))
+            return
+        end
+        local loadOk, func = pcall(function() return loadstring(code) end)
+        if loadOk and type(func) == "function" then
+            local execOk, err = pcall(func, S)
+            if not execOk then
+                warn("[Yuukiware] Execution error in " .. tab.Name .. ": " .. tostring(err))
+            end
+        else
+            warn("[Yuukiware] Loadstring failed for " .. tab.Name)
+        end
     end)
 
     B.MouseButton1Click:Connect(function()
@@ -83,9 +99,18 @@ for i, tab in ipairs(Tabs) do
         for _, b in pairs(TC:GetChildren()) do if b:IsA("TextButton") then TS:Create(b, TweenInfo.new(0.2), {TextColor3 = (b == B and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6))}):Play() end end
     end)
 end
+
 -- 6. Connections
 IC.MouseButton1Click:Connect(function() M.Visible = not M.Visible end)
-Kl.MouseButton1Click:Connect(function() getgenv().YW_Loaded = false SG:Destroy() end)
+
+Kl.MouseButton1Click:Connect(function()
+    for _, conn in ipairs(Cleanup) do
+        pcall(function() conn:Disconnect() end)
+    end
+    getgenv().YW_Loaded = false
+    SG:Destroy()
+end)
+
 Mn.MouseButton1Click:Connect(function() 
     mi = not mi 
     TS:Create(M, TweenInfo.new(0.3), {Size = mi and UDim2.new(0, 650, 0, 42) or UDim2.new(0, 650, 0, 400)}):Play() 
