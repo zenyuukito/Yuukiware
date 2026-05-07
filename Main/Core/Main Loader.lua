@@ -40,7 +40,12 @@ Cr("UICorner", {Parent = TB, CornerRadius = UDim.new(0, 10)})
 local Title = Cr("TextLabel", {Parent = TB, BackgroundTransparency = 1, Position = UDim2.new(0, 12, 0, 0), Size = UDim2.new(0, 300, 1, 0), Text = "YUUKIWARE", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 19, Font = 19, TextXAlignment = 0, TextTransparency = 0.6, ZIndex = 2})
 
 -- Update title with version once loaded
-task.spawn(function() while task.wait(1) do Title.Text = "YUUKIWARE | " .. Ver end end)
+task.spawn(function()
+    while SG and SG.Parent do
+        task.wait(1)
+        Title.Text = "YUUKIWARE | " .. Ver
+    end
+end)
 
 local Mn = Cr("TextButton", {Parent = TB, BackgroundTransparency = 1, Position = UDim2.new(1, -80, 0, 0), Size = UDim2.new(0, 35, 1, 0), Text = "-", TextColor3 = Color3.new(1,1,1), TextSize = 20, Font = 17})
 local Kl = Cr("TextButton", {Parent = TB, BackgroundTransparency = 1, Position = UDim2.new(1, -40, 0, 0), Size = UDim2.new(0, 35, 1, 0), Text = "x", TextColor3 = Color3.fromRGB(255, 50, 50), TextSize = 20, Font = 17})
