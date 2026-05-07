@@ -1,28 +1,27 @@
 -- YUUKIWARE: MACRO CATEGORY MANAGER
 local Path = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Features/Macro/"
+
+-- List your macro feature files here (e.g., "AutoFarm.lua", "AutoBus.lua")
 local Files = {
-    "SanguineZBoost.lua", -- Add new macro filenames here as you create them!
+    -- Add macro filenames as you create them
 }
 
 return function(Page)
-    for _, FileName in pairs(Files) do
+    for _, fileName in ipairs(Files) do
         task.spawn(function()
-            local Success, Result = pcall(function()
-                local RawCode = game:HttpGet(Path .. FileName)
-                
-                -- Anti-404 Shield: Stops the "Incomplete Statement" error
-                if RawCode:find("404: Not Found") then 
-                    return nil 
+            local success, result = pcall(function()
+                local raw = game:HttpGet(Path .. fileName)
+                -- 404 detection (GitHub raw returns 404 page content)
+                if raw:match("404: Not Found") then
+                    error("File not found: " .. fileName)
                 end
-                
-                return loadstring(RawCode)()
+                return loadstring(raw)()
             end)
 
-            -- If the file loaded a valid function, run it and give it the Page
-            if Success and type(Result) == "function" then
-                Result(Page)
-            elseif not Success then
-                warn("YuukiWare: Failed to load " .. FileName .. " | Error: " .. tostring(Result))
+            if success and type(result) == "function" then
+                result(Page)
+            elseif not success then
+                warn("[Yuukiware MacroManager] Failed to load " .. fileName .. ": " .. tostring(result))
             end
         end)
     end
