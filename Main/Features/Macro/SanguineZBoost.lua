@@ -1,15 +1,18 @@
 return function(Page)
     local lp = game.Players.LocalPlayer
-    local FuncURL = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/main/Main/Functions/"
+    local ModURL = "https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Modules/"
     
-    -- Load Modules
-    local ToggleMod = loadstring(game:HttpGet(FuncURL .. "Toggle.lua"))()
-    local KeybindMod = loadstring(game:HttpGet(FuncURL .. "Keybind.lua"))()
-    local MobileMod = loadstring(game:HttpGet(FuncURL .. "Draggablebtn.lua"))()
+    -- Load Modules (Updated to your new folder structure)
+    local ToggleMod = loadstring(game:HttpGet(ModURL .. "Toggle.lua"))()
+    local KeybindMod = loadstring(game:HttpGet(ModURL .. "Keybind.lua"))()
+    local MobileMod = loadstring(game:HttpGet(ModURL .. "Draggablebtn.lua"))()
 
     local IsEnabled = false
     local IsFrozen = false
     local FloatingBtn = nil
+    
+    -- Oxford Blue Theme
+    local OxfordBlue = Color3.fromRGB(0, 33, 71)
 
     -- The Logic Function
     local function runAction()
@@ -21,8 +24,8 @@ return function(Page)
         end
     end
 
-    -- 1. Create the Row with the new name
-    local Row = ToggleMod:Create(Page, "Long range sanguine", function(state)
+    -- 1. Create the Row (Main Toggle)
+    local Row = ToggleMod:Create(Page, "Sanguine Z Boost", function(state)
         IsEnabled = state
         if not state and IsFrozen then 
             local root = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
@@ -31,29 +34,38 @@ return function(Page)
         end
     end)
 
-    -- 2. Add Mobile Floating Button Toggle (Next to the Toggle)
-    local MobIcon = Instance.new("TextButton", Row)
-    MobIcon.Size = UDim2.new(0, 50, 0, 22)
-    MobIcon.Position = UDim2.new(1, -165, 0.5, -11) -- Placed left of Keybind
-    MobIcon.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    MobIcon.Text = "MOBILE"
-    MobIcon.TextColor3 = Color3.new(0.8, 0.8, 0.8)
-    MobIcon.Font = 17
-    MobIcon.TextSize = 10
-    Instance.new("UICorner", MobIcon).CornerRadius = UDim.new(0, 4)
+    -- 2. "Add Button" (Mobile Floating Button Creator)
+    local AddBtn = Instance.new("TextButton", Row)
+    AddBtn.Size = UDim2.new(0, 65, 0, 22)
+    AddBtn.Position = UDim2.new(1, -195, 0.5, -11) -- Shifted left to fit everyone
+    AddBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    AddBtn.Text = "ADD BTN"
+    AddBtn.TextColor3 = Color3.new(1, 1, 1)
+    AddBtn.Font = 17
+    AddBtn.TextSize = 10
+    Instance.new("UICorner", AddBtn).CornerRadius = UDim.new(0, 4)
+    local Stroke = Instance.new("UIStroke", AddBtn)
+    Stroke.Color, Stroke.Thickness, Stroke.Transparency = OxfordBlue, 1, 0.5
 
-    MobIcon.MouseButton1Click:Connect(function()
+    AddBtn.MouseButton1Click:Connect(function()
         if FloatingBtn then
             FloatingBtn:Destroy()
             FloatingBtn = nil
-            MobIcon.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+            Stroke.Color = OxfordBlue
         else
-            -- Spawns the draggable button using your Draggablebtn.lua
-            FloatingBtn = MobileMod:Create("Sanguine", runAction)
-            MobIcon.TextColor3 = Color3.fromRGB(130, 0, 0) -- Turn crimson when active
+            -- Spawns the draggable button
+            FloatingBtn = MobileMod:CreateButton("Z", runAction)
+            Stroke.Color = Color3.new(1, 1, 1) -- Highlight when active
         end
     end)
 
-    -- 3. Add Keybind (Next to the Toggle)
+    -- 3. Keybind (Between Toggle and Add Button)
     KeybindMod:Add(Row, Enum.KeyCode.Q, runAction)
+    
+    -- 4. Apply Oxford Blue to the Toggle Switch
+    -- This assumes your ToggleMod:Create returns the Row frame
+    local Switch = Row:FindFirstChildWhichIsA("TextButton", true)
+    if Switch then
+        Switch.BackgroundColor3 = OxfordBlue
+    end
 end
