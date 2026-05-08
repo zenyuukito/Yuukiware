@@ -69,7 +69,6 @@ local Tabs = {
 }
 local Pg, mi = {}, false
 
--- Create a debug label visible inside the Macro tab
 local debugLabel = nil
 
 for i, tab in ipairs(Tabs) do
@@ -98,7 +97,6 @@ for i, tab in ipairs(Tabs) do
     })
     Pg[v] = S
 
-    -- Only for the Macro tab, add a visible debug label
     if i == 1 then
         debugLabel = Cr("TextLabel", {
             Parent = S,
@@ -121,15 +119,15 @@ for i, tab in ipairs(Tabs) do
             end
         end
 
-        setDebug("Fetching: " .. tab.File, Color3.fromRGB(255, 170, 0)) -- orange
+        setDebug("Fetching: " .. tab.File, Color3.fromRGB(255, 170, 0))
 
         local httpOk, code = pcall(function() return game:HttpGet(Path) end)
         if not httpOk then
-            setDebug("HTTP ERROR: " .. tostring(code), Color3.fromRGB(255, 0, 0)) -- red
+            setDebug("HTTP ERROR: " .. tostring(code), Color3.fromRGB(255, 0, 0))
             return
         end
 
-        setDebug("Compiling...", Color3.fromRGB(0, 170, 255)) -- blue
+        setDebug("Compiling...", Color3.fromRGB(0, 170, 255))
 
         local loadOk, func = pcall(function() return loadstring(code) end)
         if not loadOk or type(func) ~= "function" then
@@ -143,8 +141,7 @@ for i, tab in ipairs(Tabs) do
         if not execOk then
             setDebug("EXEC ERROR: " .. tostring(err), Color3.fromRGB(255, 0, 0))
         else
-            setDebug("DONE - " .. tab.Name .. " loaded", Color3.fromRGB(0, 170, 0)) -- green
-            -- Remove the debug label after 3 seconds so it doesn't stay in the tab
+            setDebug("DONE - " .. tab.Name .. " loaded", Color3.fromRGB(0, 170, 0))
             task.delay(3, function()
                 if debugLabel then
                     debugLabel:Destroy()
@@ -163,12 +160,6 @@ for i, tab in ipairs(Tabs) do
                 }):Play()
             end
         end
-    end)
-end
-
-    B.MouseButton1Click:Connect(function()
-        for n, p in pairs(Pg) do p.Visible = (n == v) end
-        for _, b in pairs(TC:GetChildren()) do if b:IsA("TextButton") then TS:Create(b, TweenInfo.new(0.2), {TextColor3 = (b == B and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6))}):Play() end end
     end)
 end
 
