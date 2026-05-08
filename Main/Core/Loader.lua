@@ -61,6 +61,7 @@ Cr("UIListLayout", {Parent = TC, FillDirection = 0, Padding = UDim.new(0, 5)})
 Cr("UIPadding", {Parent = TC, PaddingLeft = UDim.new(0,5), PaddingRight = UDim.new(0,5), PaddingTop = UDim.new(0,5), PaddingBottom = UDim.new(0,5)})
 
 -- 5. Tab Logic & Feature Auto-Loader (with console error logging)
+-- 5. Tab Logic & Feature Auto-Loader (VISUAL DEBUG)
 local Tabs = {
     {Name = "Macro", Folder = "Macro", File = "MacroManager"},
     {Name = "FastFlags", Folder = "Flags", File = "FlagsManager"},
@@ -68,31 +69,102 @@ local Tabs = {
 }
 local Pg, mi = {}, false
 
+-- Create a debug label visible inside the Macro tab
+local debugLabel = nil
+
 for i, tab in ipairs(Tabs) do
     local v = tab.Name
-    local B = Cr("TextButton", {Parent = TC, BackgroundColor3 = Color3.fromRGB(20, 20, 20), Size = UDim2.new(1/#Tabs, -5, 1, 0), Text = v:upper(), TextColor3 = (i==1 and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6)), Font = 17, TextSize = 12, LayoutOrder = i})
+    local B = Cr("TextButton", {
+        Parent = TC,
+        BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+        Size = UDim2.new(1/#Tabs, -5, 1, 0),
+        Text = v:upper(),
+        TextColor3 = (i==1 and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6)),
+        Font = 17,
+        TextSize = 12,
+        LayoutOrder = i
+    })
     Cr("UICorner", {Parent = B, CornerRadius = UDim.new(0, 4)})
-    
-    local S = Cr("ScrollingFrame", {Parent = PC, Name = v, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = (i==1), ScrollBarThickness = 2, ScrollBarImageColor3 = Color3.new(1, 0.2, 0.2), AutomaticCanvasSize = 2})
+
+    local S = Cr("ScrollingFrame", {
+        Parent = PC,
+        Name = v,
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Visible = (i==1),
+        ScrollBarThickness = 2,
+        ScrollBarImageColor3 = Color3.new(1, 0.2, 0.2),
+        AutomaticCanvasSize = 2
+    })
     Pg[v] = S
-    
+
+    -- Only for the Macro tab, add a visible debug label
+    if i == 1 then
+        debugLabel = Cr("TextLabel", {
+            Parent = S,
+            Size = UDim2.new(1, 0, 0, 26),
+            BackgroundColor3 = Color3.fromRGB(30, 30, 30),
+            Text = "LOADING...",
+            TextColor3 = Color3.new(1, 1, 1),
+            TextScaled = true,
+            BorderSizePixel = 0
+        })
+    end
+
     task.spawn(function()
         local Path = Config.RepoBase .. "Features/" .. tab.Folder .. "/" .. tab.File .. ".lua"
+
+        local function setDebug(msg, color)
+            if debugLabel then
+                debugLabel.Text = msg
+                debugLabel.BackgroundColor3 = color or Color3.fromRGB(30,30,30)
+            end
+        end
+
+        setDebug("Fetching: " .. tab.File, Color3.fromRGB(255, 170, 0)) -- orange
+
         local httpOk, code = pcall(function() return game:HttpGet(Path) end)
         if not httpOk then
-            warn("[Yuukiware] HTTP error loading " .. tab.Name .. ": " .. tostring(code))
+            setDebug("HTTP ERROR: " .. tostring(code), Color3.fromRGB(255, 0, 0)) -- red
             return
         end
+
+        setDebug("Compiling...", Color3.fromRGB(0, 170, 255)) -- blue
+
         local loadOk, func = pcall(function() return loadstring(code) end)
-        if loadOk and type(func) == "function" then
-            local execOk, err = pcall(func, S)
-            if not execOk then
-                warn("[Yuukiware] Execution error in " .. tab.Name .. ": " .. tostring(err))
-            end
+        if not loadOk or type(func) ~= "function" then
+            setDebug("LOADSTRING FAILED", Color3.fromRGB(255, 0, 0))
+            return
+        end
+
+        setDebug("Running...", Color3.fromRGB(0, 170, 255))
+
+        local execOk, err = pcall(func, S)
+        if not execOk then
+            setDebug("EXEC ERROR: " .. tostring(err), Color3.fromRGB(255, 0, 0))
         else
-            warn("[Yuukiware] Loadstring failed for " .. tab.Name)
+            setDebug("DONE - " .. tab.Name .. " loaded", Color3.fromRGB(0, 170, 0)) -- green
+            -- Remove the debug label after 3 seconds so it doesn't stay in the tab
+            task.delay(3, function()
+                if debugLabel then
+                    debugLabel:Destroy()
+                    debugLabel = nil
+                end
+            end)
         end
     end)
+
+    B.MouseButton1Click:Connect(function()
+        for n, p in pairs(Pg) do p.Visible = (n == v) end
+        for _, b in pairs(TC:GetChildren()) do
+            if b:IsA("TextButton") then
+                TS:Create(b, TweenInfo.new(0.2), {
+                    TextColor3 = (b == B and Color3.new(1, 0.2, 0.2) or Color3.new(0.6, 0.6, 0.6))
+                }):Play()
+            end
+        end
+    end)
+end
 
     B.MouseButton1Click:Connect(function()
         for n, p in pairs(Pg) do p.Visible = (n == v) end
