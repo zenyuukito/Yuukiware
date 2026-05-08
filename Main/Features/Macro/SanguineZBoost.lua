@@ -60,8 +60,9 @@ return function(Page)
         end
     end
     
-    addBtn.MouseButton1Click:Connect(toggleFloating)
-    addBtn.TouchTap:Connect(toggleFloating)
+ addBtn.Activated:Connect(function()
+    task.defer(toggleFloating)
+end)
     
     -- 3. Keybind (press Q to toggle freeze)
     Core.Keybind:Add(row, Enum.KeyCode.Q, action, { allowTouch = true })
