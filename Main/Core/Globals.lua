@@ -1,34 +1,31 @@
 -- YUUKIWARE: GLOBALS CACHE
-local Globals = {}
+local Globals = {
+    Players = game:GetService("Players"),
+    TS = game:GetService("TweenService"),
+    UIS = game:GetService("UserInputService"),
+    RS = game:GetService("RunService"),
+    CG = game:GetService("CoreGui"),
+    HTTP = game:GetService("HttpService"),
+    Storage = game:GetService("ReplicatedStorage"),
+    Lighting = game:GetService("Lighting"),
+    Workspace = workspace,
+    Cam = workspace.CurrentCamera,
+    Cleanup = {}
+}
 
--- Core Services
-Globals.Players = game:GetService("Players")
 Globals.LP = Globals.Players.LocalPlayer
-Globals.TS = game:GetService("TweenService")
-Globals.UIS = game:GetService("UserInputService")
-Globals.RS = game:GetService("RunService")
-Globals.CG = game:GetService("CoreGui")
-Globals.VP = game:GetService("VirtualUser")
-Globals.HTTP = game:GetService("HttpService")
-Globals.ReplicatedStorage = game:GetService("ReplicatedStorage")
-Globals.Lighting = game:GetService("Lighting")
 
--- Delta-safe VirtualUser
-local vuSuccess, vu = pcall(function() return game:GetService("VirtualUser") end)
-Globals.VirtualUser = vuSuccess and vu or nil
-
--- World/Character
-Globals.Cam = workspace.CurrentCamera
-Globals.Workspace = workspace
+-- Safe VirtualUser
+local vuS, vu = pcall(game.GetService, game, "VirtualUser")
+Globals.VU = vuS and vu
 
 function Globals.GetChar()
     return Globals.LP.Character or Globals.Workspace:FindFirstChild(Globals.LP.Name)
 end
 
--- Quick access to commonly used folders (Blox Fruits specific)
-Globals.Knockback = Globals.ReplicatedStorage:FindFirstChild("Knockback") -- For combat macros
-
--- Cleanup hook (will be set by loader)
-Globals.Cleanup = {}
+function Globals.GetRoot()
+    local c = Globals.GetChar()
+    return c and c:FindFirstChild("HumanoidRootPart")
+end
 
 return Globals
