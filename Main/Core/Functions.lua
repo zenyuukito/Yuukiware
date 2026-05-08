@@ -240,92 +240,66 @@ local Draggable = {}
 function Draggable:CreateButton(ButtonText, OnClick, parent)
     parent = parent or game:GetService("CoreGui")
     local UIS = Globals.UIS
-    
+    local RS = game:GetService("RunService")
+
     local btn = Instance.new("ImageButton")
     btn.Name = "YuukiFloatingBtn"
     btn.Parent = parent
     btn.Size = UDim2.new(0, 50, 0, 50)
-    btn.Position = UDim2.new(0.8, 0, 0.7, 0)  -- default bottom right
+    btn.Position = UDim2.new(0.8, 0, 0.7, 0)
     btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     btn.Image = ""
     btn.AutoButtonColor = false
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = btn
-    
-    local stroke = Instance.new("UIStroke")
+
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+    local stroke = Instance.new("UIStroke", btn)
     stroke.Color = Color3.fromRGB(150, 0, 0)
     stroke.Thickness = 1.5
-    stroke.Parent = btn
-    
-    local label = Instance.new("TextLabel")
-    label.Parent = btn
+
+    local label = Instance.new("TextLabel", btn)
     label.Size = UDim2.new(1, 0, 1, 0)
     label.BackgroundTransparency = 1
     label.Text = ButtonText or "!"
     label.TextColor3 = Color3.new(1, 1, 1)
     label.TextSize = 20
     label.Font = Enum.Font.GothamBold
-    
-    -- Drag logic (click + drag, not hold)
+
     local dragging = false
     local dragStartPos, dragStartMousePos
-    
-    local function updatePosition(input)
-        local delta = input.Position - dragStartMousePos
-        local newPos = UDim2.new(
-            dragStartPos.X.Scale, dragStartPos.X.Offset + delta.X,
-            dragStartPos.Y.Scale, dragStartPos.Y.Offset + delta.Y
-        )
-        btn.Position = newPos
-    end
-    
+    local moveConn, releaseConn
+
     local function onInputBegan(input, gameProcessed)
         if gameProcessed then return end
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStartPos = btn.Position
             dragStartMousePos = input.Position
-            -- Prevent click from firing if we drag
-            local conn
-            conn = UIS.InputChanged:Connect(function(ic)
+            moveConn = UIS.InputChanged:Connect(function(ic)
                 if ic.UserInputType == input.UserInputType and dragging then
-                    updatePosition(ic)
+                    local delta = ic.Position - dragStartMousePos
+                    btn.Position = UDim2.new(
+                        dragStartPos.X.Scale, dragStartPos.X.Offset + delta.X,
+                        dragStartPos.Y.Scale, dragStartPos.Y.Offset + delta.Y
+                    )
                 end
             end)
-            local releaseConn
             releaseConn = UIS.InputEnded:Connect(function(ie)
                 if ie.UserInputType == input.UserInputType then
                     dragging = false
-                    conn:Disconnect()
-                    releaseConn:Disconnect()
+                    if moveConn then moveConn:Disconnect(); moveConn = nil end
+                    if releaseConn then releaseConn:Disconnect(); releaseConn = nil end
+                    -- Only fire action if we didn't drag (small movement tolerance)
+                    local dist = (ie.Position - dragStartMousePos).Magnitude
+                    if dist < 5 then
+                        pcall(OnClick)
+                    end
                 end
             end)
         end
     end
-    
-    local function onClick(input)
-        if not dragging then
-            pcall(OnClick)
-        end
-        dragging = false -- reset flag
-    end
-    
+
     UIS.InputBegan:Connect(onInputBegan)
-    btn.InputEnded:Connect(onClick) -- works for both mouse and touch
-    
-    -- Also support mouse button click without drag
-    btn.MouseButton1Click:Connect(function()
-        if not dragging then pcall(OnClick) end
-        dragging = false
-    end)
-    btn.TouchTap:Connect(function()
-        if not dragging then pcall(OnClick) end
-        dragging = false
-    end)
-    
-    -- Return the button so it can be destroyed later
+
     return btn
 end
 
