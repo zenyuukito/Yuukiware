@@ -49,40 +49,51 @@ function Functions.CreateKeybind(parent, position, callback)
     Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
     local currentKey = nil
+    local currentMouse = nil
     local isBinding = false
 
     BindBox.MouseButton1Click:Connect(function()
         if isBinding then return end
-        
         isBinding = true
         BindBox.Text = "..."
         Stroke.Color = Color3.fromRGB(255, 50, 50)
         
-        -- Wait for the user to release the mouse so it doesn't auto-cancel
         task.wait(0.2)
         
         local connection
         connection = UIS.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Keyboard then
+            local itype = input.UserInputType
+            
+            -- KEYBOARD
+            if itype == Enum.UserInputType.Keyboard then
                 local code = input.KeyCode
-                
-                -- Reset if Backspace/Escape
                 if code == Enum.KeyCode.Backspace or code == Enum.KeyCode.Escape then
-                    currentKey = nil
+                    currentKey, currentMouse = nil, nil
                     BindBox.Text = ". . ."
                     BindBox.TextColor3 = Color3.fromRGB(255, 255, 255)
                 else
                     currentKey = code
+                    currentMouse = nil
                     BindBox.Text = code.Name:upper()
                     BindBox.TextColor3 = Color3.fromRGB(255, 50, 50)
                 end
-                
                 isBinding = false
                 Stroke.Color = Color3.fromRGB(40, 40, 40)
                 connection:Disconnect()
-                
-            elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                -- Clicked away
+            
+            -- MOUSE BUTTONS (MB4, MB5, MB6, etc.)
+            elseif itype.Name:find("MouseButton") and itype ~= Enum.UserInputType.MouseButton1 then
+                currentMouse = itype
+                currentKey = nil
+                -- Shortens "MouseButton4" to "MB4"
+                BindBox.Text = itype.Name:gsub("MouseButton", "MB")
+                BindBox.TextColor3 = Color3.fromRGB(255, 50, 50)
+                isBinding = false
+                Stroke.Color = Color3.fromRGB(40, 40, 40)
+                connection:Disconnect()
+
+            -- CLICK AWAY (If not clicking with a bindable button)
+            elseif itype == Enum.UserInputType.MouseButton1 or itype == Enum.UserInputType.Touch then
                 isBinding = false
                 Stroke.Color = Color3.fromRGB(40, 40, 40)
                 connection:Disconnect()
@@ -90,9 +101,14 @@ function Functions.CreateKeybind(parent, position, callback)
         end)
     end)
 
+    -- UNIVERSAL TRIGGER
     UIS.InputBegan:Connect(function(input, gp)
-        if not gp and currentKey and input.KeyCode == currentKey and not isBinding then
-            callback()
+        if not gp and not isBinding then
+            if currentKey and input.KeyCode == currentKey then
+                callback()
+            elseif currentMouse and input.UserInputType == currentMouse then
+                callback()
+            end
         end
     end)
 
