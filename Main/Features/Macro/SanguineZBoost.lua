@@ -58,7 +58,7 @@ SubBtn.MouseButton1Click:Connect(function()
             
             SetAnchor(true) -- ANCHOR INSTANTLY
             
-            task.wait(0.09) -- THE DURATION OF THE "HOLD"
+            task.wait(0.1) -- THE DURATION OF THE "HOLD"
             
             SetAnchor(false) -- RELEASE AUTOMATICALLY
             IsProcessing = false
