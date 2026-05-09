@@ -71,4 +71,16 @@ SubBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- The Keybind Box
+local BindBox = Funcs.CreateKeybind(Row, UDim2.new(1, -165, 0.5, -10), function()
+    -- This triggers the EXACT same 0.5s synthetic hold as the floating button
+    if IsProcessing then return end 
+    IsProcessing = true
+    
+    SetAnchor(true)
+    task.wait(0.5)
+    SetAnchor(false)
+    IsProcessing = false
+end)
+
 return true
