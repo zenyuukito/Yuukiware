@@ -4,15 +4,12 @@ local Funcs = loadstring(game:HttpGet("https://raw.githubusercontent.com/zenyuuk
 local FloatBtn = nil
 local IsProcessing = false 
 
--- 1. UI Row Setup
-local Row = Instance.new("Frame")
-Row.Name = "SanguineRow"
-Row.Parent = Container
+-- UI Row Setup
+local Row = Instance.new("Frame", Container)
 Row.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Row.Size = UDim2.new(1, 0, 0, 45)
 Instance.new("UICorner", Row).CornerRadius = UDim.new(0, 6)
 
--- 2. Title Label (Left)
 local Title = Instance.new("TextLabel", Row)
 Title.Text = "Sanguine Z Boost"
 Title.Position = UDim2.new(0, 12, 0, 0)
@@ -21,9 +18,8 @@ Title.BackgroundTransparency = 1
 Title.TextColor3 = Color3.new(1,1,1)
 Title.Font = Enum.Font.GothamMedium
 Title.TextSize = 14
-Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextXAlignment = 0
 
--- 3. Add Floating Button Label (Right)
 local SubBtn = Instance.new("TextButton", Row)
 SubBtn.Text = "Add floating button"
 SubBtn.Position = UDim2.new(0.5, 0, 0, 0)
@@ -32,33 +28,19 @@ SubBtn.BackgroundTransparency = 1
 SubBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
 SubBtn.TextSize = 12
 SubBtn.Font = Enum.Font.Gotham
-SubBtn.TextXAlignment = Enum.TextXAlignment.Right
+SubBtn.TextXAlignment = 1
 
--- 4. The Action Function
-local function RunBoost()
-    if IsProcessing then return end 
-    IsProcessing = true
-    
+-- The Action
+local function SetAnchor(state)
     local Root = G.GetRoot()
-    if Root then Root.Anchored = true end
-    
+    if Root then Root.Anchored = state end
     if FloatBtn then
-        FloatBtn.TextColor3 = Color3.new(1, 1, 1)
-        FloatBtn.UIStroke.Color = Color3.fromRGB(255, 50, 50)
+        -- Bright crimson/white flicker so you know the tap registered
+        FloatBtn.TextColor3 = state and Color3.new(1, 1, 1) or Color3.fromRGB(255, 50, 50)
+        FloatBtn.UIStroke.Color = state and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(150, 0, 0)
     end
-    
-    task.wait(0.15) -- THE DURATION
-    
-    if Root then Root.Anchored = false end
-    
-    if FloatBtn then
-        FloatBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-        FloatBtn.UIStroke.Color = Color3.fromRGB(150, 0, 0)
-    end
-    IsProcessing = false
 end
 
--- 5. Logic for the Floating Button Toggle
 SubBtn.MouseButton1Click:Connect(function()
     if not FloatBtn then
         FloatBtn = Funcs.CreateFloating("Sanguine", {
@@ -68,18 +50,25 @@ SubBtn.MouseButton1Click:Connect(function()
             Size = UDim2.new(0, 100, 0, 40)
         })
         SubBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-        FloatBtn.MouseButton1Down:Connect(RunBoost)
+        
+        -- THE FIX: Instant Trigger, Auto Release
+        FloatBtn.MouseButton1Down:Connect(function()
+            if IsProcessing then return end -- Don't overlap pulses
+            IsProcessing = true
+            
+            SetAnchor(true) -- ANCHOR INSTANTLY
+            
+            task.wait(0.5) -- THE DURATION OF THE "HOLD"
+            
+            SetAnchor(false) -- RELEASE AUTOMATICALLY
+            IsProcessing = false
+        end)
     else
         FloatBtn:Destroy()
         FloatBtn = nil
         SubBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+        SetAnchor(false)
     end
-end)
-
--- 6. The Keybind Box (Fixed placement)
--- Wrapping this in a pcall so if Functions.lua fails, the menu still shows up!
-pcall(function()
-    Funcs.CreateKeybind(Row, UDim2.new(1, -165, 0.5, -10), RunBoost)
 end)
 
 return true
