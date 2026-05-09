@@ -1,35 +1,41 @@
 local Functions = {}
 local G = loadstring(game:HttpGet("https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Core/Globals.lua"))()
 
--- Master Switch State
-Functions.Enabled = false 
-
 function Functions.CreateMasterToggle(parent)
-    local Toggle = Instance.new("TextButton", parent)
-    Toggle.Name = "MasterToggle"
-    Toggle.Size = UDim2.new(0, 25, 0, 25)
-    Toggle.Position = UDim2.new(0, 10, 0.5, -12)
-    Toggle.BackgroundColor3 = Color3.fromRGB(31, 35, 49) -- Oxford Blue
-    Toggle.Text = ""
-    Toggle.AutoButtonColor = false
+    local State = {Enabled = false}
     
-    Instance.new("UICorner", Toggle).CornerRadius = UDim.new(0, 4)
-    local Stroke = Instance.new("UIStroke", Toggle)
-    Stroke.Color = Color3.fromRGB(50, 50, 50)
-    Stroke.Thickness = 2
+    -- Outer Checkbox Frame
+    local Box = Instance.new("TextButton", parent)
+    Box.Name = "Checkbox_Base"
+    Box.Size = UDim2.new(0, 18, 0, 18) -- Smaller, checkbox size
+    Box.Position = UDim2.new(0, 12, 0.5, -9)
+    Box.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Box.Text = ""
+    Box.AutoButtonColor = false
+    Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
+    
+    local Stroke = Instance.new("UIStroke", Box)
+    Stroke.Color = Color3.fromRGB(45, 45, 45)
+    Stroke.Thickness = 1
     Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    Toggle.MouseButton1Click:Connect(function()
-        Functions.Enabled = not Functions.Enabled
-        if Functions.Enabled then
-            Stroke.Color = Color3.fromRGB(255, 255, 255)
-            Toggle.BackgroundColor3 = Color3.fromRGB(0, 33, 71)
-        else
-            Stroke.Color = Color3.fromRGB(50, 50, 50)
-            Toggle.BackgroundColor3 = Color3.fromRGB(31, 35, 49)
-        end
+    -- Inner Crimson Check
+    local InnerCheck = Instance.new("Frame", Box)
+    InnerCheck.Name = "Checkmark"
+    InnerCheck.Size = UDim2.new(0, 10, 0, 10)
+    InnerCheck.Position = UDim2.new(0.5, -5, 0.5, -5)
+    InnerCheck.BackgroundColor3 = Color3.fromRGB(150, 0, 0) -- Crimson Dark Red
+    InnerCheck.BorderSizePixel = 0
+    InnerCheck.Visible = false -- Hidden by default
+    Instance.new("UICorner", InnerCheck).CornerRadius = UDim.new(0, 2)
+
+    Box.MouseButton1Click:Connect(function()
+        State.Enabled = not State.Enabled
+        InnerCheck.Visible = State.Enabled
+        Stroke.Color = State.Enabled and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(45, 45, 45)
     end)
-    return Toggle
+    
+    return State
 end
 
 function Functions.CreateFloating(name, config)
@@ -50,13 +56,15 @@ function Functions.CreateFloating(name, config)
     local Stroke = Instance.new("UIStroke", Btn)
     Stroke.Color = config.StrokeColor or Color3.fromRGB(150, 0, 0)
     Stroke.Thickness = 1.5
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     Drag.MakeDraggable(Btn)
     return Btn
 end
 
-function Functions.CreateKeybind(parent, position, callback)
+function Functions.CreateKeybind(parent, position, callback, stateObject)
     local UIS = game:GetService("UserInputService")
     local BindBox = Instance.new("TextButton", parent)
+    BindBox.Name = "KeybindBox"
     BindBox.Size = UDim2.new(0, 40, 0, 22)
     BindBox.Position = position
     BindBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
@@ -64,16 +72,19 @@ function Functions.CreateKeybind(parent, position, callback)
     BindBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     BindBox.Font = Enum.Font.GothamBold
     BindBox.TextSize = 10
+    BindBox.AutoButtonColor = false
     Instance.new("UICorner", BindBox).CornerRadius = UDim.new(0, 4)
     local Stroke = Instance.new("UIStroke", BindBox)
     Stroke.Color = Color3.fromRGB(40, 40, 40)
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
     local currentKey, currentMouse, isBinding = nil, nil, false
 
     BindBox.MouseButton1Click:Connect(function()
         if isBinding then return end
-        isBinding, BindBox.Text = true, "..."
-        Stroke.Color = Color3.fromRGB(255, 50, 50)
+        isBinding = true
+        BindBox.Text = "..."
+        Stroke.Color = Color3.fromRGB(150, 0, 0)
         task.wait(0.2)
         local connection
         connection = UIS.InputBegan:Connect(function(input)
@@ -83,9 +94,11 @@ function Functions.CreateKeybind(parent, position, callback)
                 if code == Enum.KeyCode.Backspace or code == Enum.KeyCode.Escape then
                     currentKey, currentMouse = nil, nil
                     BindBox.Text = ". . ."
+                    BindBox.TextColor3 = Color3.fromRGB(255, 255, 255)
                 else
                     currentKey, currentMouse = code, nil
                     BindBox.Text = code.Name:upper()
+                    BindBox.TextColor3 = Color3.fromRGB(150, 0, 0)
                 end
                 isBinding = false
                 Stroke.Color = Color3.fromRGB(40, 40, 40)
@@ -93,6 +106,7 @@ function Functions.CreateKeybind(parent, position, callback)
             elseif itype.Name:find("MouseButton") and itype ~= Enum.UserInputType.MouseButton1 then
                 currentMouse, currentKey = itype, nil
                 BindBox.Text = itype.Name:gsub("MouseButton", "MB")
+                BindBox.TextColor3 = Color3.fromRGB(150, 0, 0)
                 isBinding = false
                 Stroke.Color = Color3.fromRGB(40, 40, 40)
                 connection:Disconnect()
@@ -105,8 +119,8 @@ function Functions.CreateKeybind(parent, position, callback)
     end)
 
     UIS.InputBegan:Connect(function(input, gp)
-        -- ADDED THE MASTER CHECK HERE DIRECTLY
-        if not gp and not isBinding and Functions.Enabled then
+        local isEnabled = (not stateObject) or (stateObject.Enabled)
+        if not gp and not isBinding and isEnabled then
             if (currentKey and input.KeyCode == currentKey) or (currentMouse and input.UserInputType == currentMouse) then
                 callback()
             end
