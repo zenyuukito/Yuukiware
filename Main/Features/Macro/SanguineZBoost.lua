@@ -2,8 +2,9 @@ local Container, G = ...
 local Funcs = loadstring(game:HttpGet("https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Core/Functions.lua"))()
 
 local FloatBtn = nil
+local isHolding = false -- Tracks if the button is currently pressed
 
--- UI Row Setup
+-- UI Row Setup (Left: Name | Right: Option)
 local Row = Instance.new("Frame", Container)
 Row.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Row.Size = UDim2.new(1, 0, 0, 45)
@@ -29,11 +30,12 @@ SubBtn.TextSize = 12
 SubBtn.Font = Enum.Font.Gotham
 SubBtn.TextXAlignment = 1
 
--- Anchor Logic
+-- Anchor Function
 local function SetAnchor(state)
     local Root = G.GetRoot()
     if Root then Root.Anchored = state end
     if FloatBtn then
+        -- Visual feedback: Pure white text when boost is active
         FloatBtn.TextColor3 = state and Color3.new(1, 1, 1) or Color3.fromRGB(255, 50, 50)
         FloatBtn.UIStroke.Color = state and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(150, 0, 0)
     end
@@ -41,18 +43,32 @@ end
 
 SubBtn.MouseButton1Click:Connect(function()
     if not FloatBtn then
-        -- We pass the custom config HERE, so only this button says BOOST
         FloatBtn = Funcs.CreateFloating("Sanguine", {
             Text = "BOOST",
             TextColor = Color3.fromRGB(255, 50, 50),
             BgColor = Color3.new(0, 0, 0),
             Size = UDim2.new(0, 100, 0, 40)
         })
-        
         SubBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-        FloatBtn.MouseButton1Down:Connect(function() SetAnchor(true) end)
-        FloatBtn.MouseButton1Up:Connect(function() SetAnchor(false) end)
-        FloatBtn.MouseLeave:Connect(function() SetAnchor(false) end)
+        
+        -- Logic: 0.5s Safety Hold
+        FloatBtn.MouseButton1Down:Connect(function()
+            isHolding = true
+            task.delay(0.5, function()
+                -- Only anchor if they are STILL holding after 0.5s
+                if isHolding then
+                    SetAnchor(true)
+                end
+            end)
+        end)
+        
+        local function EndHold()
+            isHolding = false
+            SetAnchor(false)
+        end
+        
+        FloatBtn.MouseButton1Up:Connect(EndHold)
+        FloatBtn.MouseLeave:Connect(EndHold)
     else
         FloatBtn:Destroy()
         FloatBtn = nil
