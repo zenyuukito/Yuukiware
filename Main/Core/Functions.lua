@@ -1,9 +1,9 @@
 local Functions = {}
 local G = loadstring(game:HttpGet("https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Core/Globals.lua"))()
 
--- 1. LOCAL CHECKBOX TOGGLE (With Literal Checkmark)
+-- 1. LOCAL CHECKBOX TOGGLE
 function Functions.CreateMasterToggle(parent)
-    local State = {Enabled = false} -- This makes it local to the specific feature
+    local State = {Enabled = false}
     
     -- The Outer Box
     local Box = Instance.new("TextButton", parent)
@@ -20,29 +20,28 @@ function Functions.CreateMasterToggle(parent)
     Stroke.Thickness = 1
     Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- The Literal Checkmark (✓)
     local CheckSymbol = Instance.new("TextLabel", Box)
     CheckSymbol.Name = "Checkmark"
     CheckSymbol.Text = "✓" 
     CheckSymbol.Size = UDim2.new(1, 0, 1, 0)
     CheckSymbol.BackgroundTransparency = 1
-    CheckSymbol.TextColor3 = Color3.fromRGB(180, 0, 0) -- Crimson Red
+    CheckSymbol.TextColor3 = Color3.fromRGB(180, 0, 0)
     CheckSymbol.Font = Enum.Font.GothamBold
     CheckSymbol.TextSize = 16
-    CheckSymbol.Visible = false -- Hidden by default
+    CheckSymbol.Visible = false
 
     Box.MouseButton1Click:Connect(function()
         State.Enabled = not State.Enabled
         CheckSymbol.Visible = State.Enabled
         
-        -- Visual feedback on the border
+
         Stroke.Color = State.Enabled and Color3.fromRGB(120, 0, 0) or Color3.fromRGB(40, 40, 40)
     end)
     
     return State
 end
 
--- 2. FLOATING BUTTON GENERATOR
+-- 2. FLOATING BUTTON
 function Functions.CreateFloating(name, config)
     local Drag = loadstring(game:HttpGet("https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Core/Dragging.lua"))()
     config = config or {}
@@ -70,7 +69,7 @@ function Functions.CreateFloating(name, config)
     return Btn
 end
 
--- 3. KEYBIND SYSTEM (Supports Mouse 4-9 + Local State)
+-- 3. KEYBIND SYSTEM
 function Functions.CreateKeybind(parent, position, callback, stateObject)
     local UIS = game:GetService("UserInputService")
     
