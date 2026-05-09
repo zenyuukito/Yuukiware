@@ -1,33 +1,3 @@
-local Functions = {}
-local G = loadstring(game:HttpGet("https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Core/Globals.lua"))()
-
-function Functions.CreateFloating(name, config)
-    local Drag = loadstring(game:HttpGet("https://raw.githubusercontent.com/zenyuukito/Yuukiware/refs/heads/main/Main/Core/Dragging.lua"))()
-    config = config or {}
-    
-    local Btn = Instance.new("TextButton")
-    Btn.Name = name .. "_Float"
-    Btn.Parent = G.CG:FindFirstChild("YuukiWare")
-    Btn.Size = config.Size or UDim2.new(0, 100, 0, 40)
-    Btn.Position = UDim2.new(0.1, 0, 0.5, 0)
-    Btn.BackgroundColor3 = config.BgColor or Color3.fromRGB(0, 0, 0)
-    Btn.Text = config.Text or name:upper()
-    Btn.TextColor3 = config.TextColor or Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.Gotham
-    Btn.TextSize = 14
-    Btn.AutoButtonColor = false
-    
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
-    
-    local Stroke = Instance.new("UIStroke", Btn)
-    Stroke.Color = config.StrokeColor or Color3.fromRGB(150, 0, 0)
-    Stroke.Thickness = 1.5
-    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    
-    Drag.MakeDraggable(Btn)
-    return Btn
-end
-
 function Functions.CreateKeybind(parent, position, callback)
     local UIS = game:GetService("UserInputService")
     
@@ -38,7 +8,7 @@ function Functions.CreateKeybind(parent, position, callback)
     BindBox.Position = position
     BindBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     BindBox.Text = ". . ."
-    BindBox.TextColor3 = Color3.fromRGB(255, 255, 255) -- White default
+    BindBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     BindBox.Font = Enum.Font.GothamBold
     BindBox.TextSize = 10
     BindBox.AutoButtonColor = false
@@ -51,26 +21,43 @@ function Functions.CreateKeybind(parent, position, callback)
     local currentKey = nil
     local isBinding = false
 
-    -- Clicking the box to bind
     BindBox.MouseButton1Click:Connect(function()
         if isBinding then return end
         isBinding = true
         BindBox.Text = "..."
         BindBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Stroke.Color = Color3.fromRGB(255, 50, 50) -- Highlight border while listening
+        Stroke.Color = Color3.fromRGB(255, 50, 50)
+
+        -- THE FIX: Wait a fraction of a second so your current click/tap doesn't instantly cancel the bind
+        task.wait(0.15)
 
         local connection
         connection = UIS.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Keyboard then
-                -- Key pressed, save it
-                currentKey = input.KeyCode
-                BindBox.Text = currentKey.Name:upper()
-                BindBox.TextColor3 = Color3.fromRGB(255, 50, 50) -- Turn Crimson
-                Stroke.Color = Color3.fromRGB(40, 40, 40)
-                isBinding = false
-                connection:Disconnect()
+                
+                -- Added Feature: Pressing Backspace or Escape clears the bind
+                if input.KeyCode == Enum.KeyCode.Backspace or input.KeyCode == Enum.KeyCode.Escape then
+                    currentKey = nil
+                    BindBox.Text = ". . ."
+                    BindBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    Stroke.Color = Color3.fromRGB(40, 40, 40)
+                    isBinding = false
+                    connection:Disconnect()
+                    return
+                end
+
+                -- Normal Bind
+                if input.KeyCode ~= Enum.KeyCode.Unknown then
+                    currentKey = input.KeyCode
+                    BindBox.Text = currentKey.Name:upper()
+                    BindBox.TextColor3 = Color3.fromRGB(255, 50, 50)
+                    Stroke.Color = Color3.fromRGB(40, 40, 40)
+                    isBinding = false
+                    connection:Disconnect()
+                end
+
             elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                -- Clicked away, cancel bind
+                -- Clicked away, cancel bind and revert to previous state
                 isBinding = false
                 BindBox.Text = currentKey and currentKey.Name:upper() or ". . ."
                 BindBox.TextColor3 = currentKey and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(255, 255, 255)
@@ -80,7 +67,6 @@ function Functions.CreateKeybind(parent, position, callback)
         end)
     end)
 
-    -- Listening for the actual bound key press
     UIS.InputBegan:Connect(function(input, gameProcessed)
         if not gameProcessed and not isBinding and currentKey and input.KeyCode == currentKey then
             callback()
@@ -89,5 +75,3 @@ function Functions.CreateKeybind(parent, position, callback)
 
     return BindBox
 end
-
-return Functions
