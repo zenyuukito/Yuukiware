@@ -4,7 +4,6 @@ local Funcs = loadstring(game:HttpGet("https://raw.githubusercontent.com/zenyuuk
 local FloatBtn = nil
 local IsProcessing = false 
 
--- UI Row Setup
 local Row = Instance.new("Frame", Container)
 Row.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Row.Size = UDim2.new(1, 0, 0, 45)
@@ -30,15 +29,22 @@ SubBtn.TextSize = 12
 SubBtn.Font = Enum.Font.Gotham
 SubBtn.TextXAlignment = 1
 
--- The Action
 local function SetAnchor(state)
     local Root = G.GetRoot()
     if Root then Root.Anchored = state end
     if FloatBtn then
-        -- Bright crimson/white flicker so you know the tap registered
         FloatBtn.TextColor3 = state and Color3.new(1, 1, 1) or Color3.fromRGB(255, 50, 50)
         FloatBtn.UIStroke.Color = state and Color3.fromRGB(255, 50, 50) or Color3.fromRGB(150, 0, 0)
     end
+end
+
+local function RunPulse()
+    if IsProcessing then return end
+    IsProcessing = true
+    SetAnchor(true)
+    task.wait(0.15)
+    SetAnchor(false)
+    IsProcessing = false
 end
 
 SubBtn.MouseButton1Click:Connect(function()
@@ -46,29 +52,18 @@ SubBtn.MouseButton1Click:Connect(function()
         FloatBtn = Funcs.CreateFloating("Sanguine", {
             Text = "BOOST",
             TextColor = Color3.fromRGB(255, 50, 50),
-            BgColor = Color3.new(0, 0, 0),
-            Size = UDim2.new(0, 100, 0, 40)
+            BgColor = Color3.new(0, 0, 0)
         })
         SubBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-        
-        -- THE FIX: Instant Trigger, Auto Release
-        FloatBtn.MouseButton1Down:Connect(function()
-            if IsProcessing then return end -- Don't overlap pulses
-            IsProcessing = true
-            
-            SetAnchor(true) -- ANCHOR INSTANTLY
-            
-            task.wait(0.18) -- THE DURATION OF THE "HOLD"
-            
-            SetAnchor(false) -- RELEASE AUTOMATICALLY
-            IsProcessing = false
-        end)
+        FloatBtn.MouseButton1Down:Connect(RunPulse)
     else
         FloatBtn:Destroy()
         FloatBtn = nil
         SubBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-        SetAnchor(false)
     end
 end)
+
+-- Universal Keybind Call
+Funcs.CreateKeybind(Row, UDim2.new(1, -165, 0.5, -11), RunPulse)
 
 return true
