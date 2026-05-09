@@ -45,7 +45,7 @@ local function RunPulse()
     if not FeatureState.Enabled or IsProcessing then return end
     IsProcessing = true
     SetAnchor(true)
-    task.wait(0.15)
+    task.wait(0.8)
     SetAnchor(false)
     IsProcessing = false
 end
